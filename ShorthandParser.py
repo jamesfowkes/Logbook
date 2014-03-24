@@ -90,7 +90,7 @@ class ShorthandParser():
                         if len(gliders) == 0:
                             raise ShorthandParseException(matches[idx], "Could not parse this %s" % expectedMatch )
                     
-                    gliderID = random.choice(gliders).ID
+                    gliderID = random.choice(gliders).Get('ID')
                         
                 elif expectedMatch == "Date":
                     try:
@@ -99,7 +99,7 @@ class ShorthandParser():
                         raise ShorthandParseException(matches[idx], "Could not parse this %s" % expectedMatch )
                                
                 elif expectedMatch == "Location":
-                    location_name = Location.findByName(self.db, match).name
+                    location_name = Location.findByName(self.db, match).Get('name')
                     if location_name is None:
                         raise ShorthandParseException(matches[idx], "Could not parse this %s" % expectedMatch)
                         
@@ -136,7 +136,7 @@ class ShorthandParser():
         if len(times) != number_of_flights:
             raise ShorthandParseException(self.shorthand, "Number of flights (%d) and provided times (%d) do not match." % (number_of_flights, len(times)))
         
-        flights = [Flight(flightDate, gliderID, location_name, capacity, t, launchtype, 0, notes) for t in times]
+        flights = [Flight(self.db, self.db.flights, flightDate, gliderID, location_name, capacity, t, launchtype, 0, notes) for t in times]
         
         return flights
     

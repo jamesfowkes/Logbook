@@ -5,16 +5,18 @@ from DBCreator import DBCreator
 from DBError import DBError
         
 class DBAccess:
-    """Database description and access layer for GLOG"""
+    """Database description and access layer"""
 
     def __init__(self, path):
         self.dbpath = path
-        self._lastError_ = ''
         self.__tryConnection__()
         
         if self.getConnectionState():
             self._dbCreator = DBCreator(self.db)
-
+    
+    def commit(self):
+        self.db.commit()
+        
     def scanForErrors(self):
         self._dbCreator.scanForErrors()
         
@@ -24,9 +26,6 @@ class DBAccess:
     def getDatabasePath(self):
         return self.dbpath
     
-    def getLastError(self):
-        return self._lastError_
-
     def createMissingTables(self):
         try:
             self._dbCreator.createMissingTables()
@@ -38,68 +37,20 @@ class DBAccess:
             self._dbCreator.populateDefaults()
         except:
             print self._dbCreator.errors
-
-    """ CREATE Operations """
-    
-    def CreateGliderType(self, manufacturer, name):
-        
-        result = True
-        
-        try:
-            self.db.glidertypes.insert(
-                Manufacturer = manufacturer,
-                Name = name)
-                
-            self.db.commit()
-            
-        except:
-            result = False
-            
-        return result
-        
-    def CreateManufacturer(self, name):
-        
-        result = True
-        
-        try:
-            self.db.manufacturers.insert(
-                Name = name)
-                
-            self.db.commit()
-            
-        except:
-            result = False
-            
-        return result
-        
-    def CreateLocation(self, name, lat, long):
-        
-        result = True
-        
-        try:
-            self.db.locations.insert(
-                Name = name,
-                Lat = lat,
-                Long = long)
-                
-            self.db.commit()
-            
-        except:
-            result = False
-            
-        return result
-        
     
     def __tryConnection__(self):
+
+        if not os.path.isfile(self.dbpath):
+            raise DBError("__tryConnection__", "%s was not found" % self.dbpath)
+
         try:
             self.db = sqlsoup.SQLSoup("sqlite:///%s" % self.dbpath)
         except:
-            self._lastError_ = "Could not connect to %s" % self.dbpath
             self.db = None
+            raise DBError("__tryConnection__", "Could not connect to %s" % self.dbpath)
         
 def main(argv = None):
-    """Standalone test for GLOG_DB_Access"""
-    test = DBAccess("testlog.db")
+    pass
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,8 @@
 import random
 from random import randint
-        
+
+from DBRecord import DBRecord
+
 class GliderSearch:
     TRIGRAPH = 1
     COMPNO = 2
@@ -22,10 +24,10 @@ class GliderSearch:
         except:
             raise
         
-        gliders = [Glider(r.ID, r.Trigraph, r.Comp_No, r.Reg, r.Type, r.Notes) for r in results]
+        gliders = [Glider(db.gliders, r.ID, r.Trigraph, r.Comp_No, r.Reg, r.Type, r.Notes) for r in results]
         return gliders
         
-class Glider:
+class Glider(DBRecord):
 
     @staticmethod
     def getRandomTrigraphOrCompNo(db):
@@ -39,62 +41,15 @@ class Glider:
         else:
             return trigraph
     
-    def __init__(self, id, trigraph, comp_no, reg, type, notes):
-        self.ID = id
-        self.trigraph = trigraph
-        self.comp_no = comp_no
-        self.reg = reg
-        self.type = type
-        self.notes = notes
+    def __init__(self, table, id, trigraph, comp_no, reg, type, notes):
         
-    def Create(self, db):
-        
-        result = True
-        self.db = db.db
-        try:
-            self.db.gliders.insert(
-                Trigraph = self.trigraph,
-                Comp_No = self.comp_no,
-                Reg = self.reg,
-                Type = self.type,
-                Notes = self.notes)
-                
-            self.db.commit()
+        data_dict = {
+            'ID':id,
+            'trigraph':trigraph,
+            'comp_no':comp_no,
+            'reg':reg,
+            'type':type,
+            'notes':notes}
             
-        except:
-            raise
-            #result = False
-            
-        return result
-    
-    def Delete(self):
-    
-        result = True
-        
-        try:
-            glider = self.db.gliders.filter_by(Trigraph=self.trigraph).one()
-            self.db.delete( flight )
-            self.db.commit()
-            
-        except:
-            result = False
-            
-        return result
-        
-    def Update(self):
-    
-        result = True
-        
-        try:
-            glider = self.db.gliders.filter_by(Trigraph=self.trigraph).one()
-            glider.Comp_No = self.comp_no,
-            glider.Reg = self.reg,
-            glider.Type = self.type,
-            glider.Notes = self.notes
+        DBRecord.__init__(self, table, data_dict)
 
-            self.db.commit()
-            
-        except:
-            result = False
-            
-        return result

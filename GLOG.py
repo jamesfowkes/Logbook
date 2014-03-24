@@ -35,7 +35,7 @@ class ConsoleHandler:
         try:
             newFlights = ShorthandParser(cmd, self.db.db).getFlights()
             for f in newFlights:
-                f.Create(self.db)
+                f.Create()
                 
         except ShorthandParseException as e:
             print "Error parsing shorthand: %s" % e

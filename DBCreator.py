@@ -96,6 +96,9 @@ manufs = ['Schleicher', 'Grob', 'Slingsby', 'Schempp-Hirth']
 class DBCreator:                                       
                                                       
     def __init__(self, db):
+        if db is None:
+            raise DBError("DBCreator.__init__", "No database object provided")
+
         self.db = db
         self.logger = logging.getLogger(self.__class__.__name__)
         ch = logging.StreamHandler(sys.stdout)

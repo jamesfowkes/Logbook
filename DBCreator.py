@@ -96,31 +96,8 @@ manufs = ['Schleicher', 'Grob', 'Slingsby', 'Schempp-Hirth']
 class DBCreator:                                       
                                                       
     def __init__(self, db):
-        if db is None:
-            raise DBError("DBCreator.__init__", "No database object provided")
+        
 
-        self.db = db
-        self.logger = logging.getLogger(self.__class__.__name__)
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.DEBUG)
-        self.logger.addHandler(ch)
-        
-    def createMissingTables(self):
-        
-        """Create the database tables"""
-        self.__createMissingTables__()
-    
-        if len(self.errors) > 0:
-            raise DBError("createMissingTables", "Error(s) occured while creating tables")
-    
-    def populateDefaults(self):
-        
-        """Populate the tables with default data """
-        self.__populateDefaults__()
-    
-        if len(self.errors) > 0:
-            raise DBError("populateDefaults", "Error(s) occured while populating tables")
-    
     
     def scanForErrors(self):
     
@@ -135,27 +112,6 @@ class DBCreator:
                     self.errors.append("Column '%s' not in table '%s'" % (column, name))
         
         return (len(self.errors) > 0)
-     
-    def __populateDefaults__(self):
-    
-        self.errors = []
-        
-        try:
-            if self.__tableIsEmpty__("manufacturers"):
-                for manuf in manufs:
-                    self.db.execute(sql['createDefaultManufacturers'] % manuf)
-            if self.__tableIsEmpty__("glidertypes"):
-                for type in types:
-                    self.db.execute(sql['createDefaultGliderTypes'] % type)                
-            if self.__tableIsEmpty__("locations"):
-                for location in locations:
-                    self.db.execute(sql['createDefaultLocations'] % location)
-            if self.__tableIsEmpty__("gliders"):
-                for glider in gliders:
-                    self.db.execute(sql['createDefaultGliders'] % glider)
-            
-        except Exception as e:
-            self.errors.append(str(e))
 
     def __createMissingTables__(self):
         """Create any missing tables"""
@@ -182,8 +138,7 @@ class DBCreator:
             return [tabledef[0] for tabledef in self.db.fetchall()]
         except:
             return[]
-        
-    
+
     def __getColumnsFromDb__(self, table):
         """Pulls list of columns from a database table"""
         
@@ -192,28 +147,6 @@ class DBCreator:
             return [columndef[1] for columndef in self.db.fetchall()]
         except:
             return []
-    
-    def __createColumnDef__(self, columndef):
-        """Creates SQL compliant column definition 
-        from single local column definition"""
-        try:
-            sqlcolumndef = columndef[1] % columndef[0]
-        except:
-            print columndef
-            
-        return sqlcolumndef
-        
-    def __getColumnDefString__(self, tabledef):
-        """Creates SQL compliant column definition
-        for entire table from descriptions at head of file"""
-        
-        columndefs = ", ".join( [self.__createColumnDef__(column) for column in tabledef] )
-        return columndefs
-   
-    def __tableIsEmpty__(self, table):
-        _sql = "SELECT COUNT(*) AS row_count FROM %s" % table
-        result = self.db.execute(_sql).fetchone()
-        return result['row_count'] == 0
         
 def main(argv = None):
     """Standalone run for GLOG_DB_Create"""
